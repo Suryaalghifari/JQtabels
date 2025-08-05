@@ -1,0 +1,333 @@
+$(function () {
+	// --- Source & Data Adapter ---
+	const source = {
+		datatype: "json",
+		datafields: [
+			{ name: "id", type: "string" },
+			{ name: "name", type: "string" },
+			{ name: "type", type: "string" },
+			{ name: "calories", type: "string" },
+			{ name: "totalfat", type: "string" },
+			{ name: "protein", type: "string" },
+			{ name: "quantity", type: "string" },
+			{ name: "unit_price", type: "string" },
+			{ name: "total_price", type: "string" },
+		],
+		url: base_url + "index.php/api/products_get", // API endpoint to fetch product
+	};
+	const dataAdapter = new $.jqx.dataAdapter(source);
+
+	// --- Init Grid ---
+	$("#jqxgrid").jqxGrid({
+		width: "100%",
+		height: 600,
+		source: dataAdapter,
+		pageable: true,
+		pagesizeoptions: ["5", "10", "20", "50", "100"],
+		pagesize: 20,
+		sortable: true,
+		filterable: true,
+		editable: true,
+		columnsresize: true,
+		selectionmode: "checkbox",
+		showtoolbar: true,
+		rendertoolbar: function (toolbar) {
+			const container = $("<div style='margin: 5px;'></div>");
+			const addButton = $("<button>Tambah Data</button>");
+			const deleteButton = $("<button>Hapus Data</button>");
+			container.append(addButton, deleteButton);
+			toolbar.append(container);
+
+			addButton.on("click", handleAddRow);
+			deleteButton.on("click", handleDeleteRows);
+		},
+		columns: [
+			{
+				text: "No",
+				datafield: "no",
+				width: 50,
+				editable: false,
+				align: "center",
+				textalign: "center",
+				cellsrenderer: function (row) {
+					return `<div style="text-align:center; width:100%;">${row + 1}</div>`;
+				},
+			},
+
+			{
+				text: "Name",
+				datafield: "name",
+				width: 200,
+				align: "center",
+				cellsalign: "center",
+			},
+			{
+				text: "Type",
+				datafield: "type",
+				width: 180,
+				align: "center",
+				cellsalign: "center",
+			},
+			{
+				text: "Calories",
+				datafield: "calories",
+				width: 80,
+				align: "center",
+				cellsalign: "center",
+			},
+			{
+				text: "Total Fat",
+				datafield: "totalfat",
+				width: 80,
+				align: "center",
+				cellsalign: "center",
+			},
+			{
+				text: "Protein",
+				datafield: "protein",
+				width: 80,
+				align: "center",
+				cellsalign: "center",
+			},
+			{
+				text: "Qty",
+				datafield: "quantity",
+				width: 80,
+				align: "center",
+				cellsalign: "center",
+			},
+			{
+				text: "Unit Price",
+				datafield: "unit_price",
+				width: 100,
+				align: "center",
+				cellsrenderer: (row, column, value) =>
+					value
+						? `<span style="display:block; text-align:center; width:100%;">Rp ${parseInt(
+								value
+						  ).toLocaleString("id-ID")}</span>`
+						: "",
+			},
+			{
+				text: "Total Price",
+				datafield: "total_price",
+				width: 120,
+				align: "center",
+				cellsrenderer: (row, column, value) =>
+					value
+						? `<span style="display:block; text-align:center; width:100%;">Rp ${parseInt(
+								value
+						  ).toLocaleString("id-ID")}</span>`
+						: "",
+			},
+			{
+				text: "Directory",
+				datafield: "id",
+				editable: false,
+				width: 100,
+				align: "center",
+				cellsrenderer: (row, column, value) =>
+					`<button class="btn-directory" data-id="${value}" style="display:block; margin:0 auto;">📂</button>`,
+			},
+		],
+	});
+
+	// Handler Tambah Row
+	function handleAddRow() {
+		const newrow = {
+			name: "",
+			type: "",
+			calories: "",
+			totalfat: "",
+			protein: "",
+			quantity: "",
+			unit_price: "",
+			total_price: "",
+		};
+		$("#jqxgrid").jqxGrid("addrow", null, newrow);
+		const datainfo = $("#jqxgrid").jqxGrid("getdatainformation");
+		const lastrow = datainfo.rowscount - 1;
+		$("#jqxgrid").jqxGrid("begincelledit", lastrow, "name");
+	}
+
+	function handleDeleteRows() {
+		const selectedIndexes = $("#jqxgrid").jqxGrid("getselectedrowindexes");
+		if (!selectedIndexes.length) {
+			alert("Pilih data yang mau dihapus (centang di kiri)!");
+			return;
+		}
+		const idsToDelete = selectedIndexes
+			.map((idx) => $("#jqxgrid").jqxGrid("getrowdata", idx)?.id)
+			.filter((id) => !!id);
+
+		if (!idsToDelete.length) {
+			alert("Tidak ada data valid untuk dihapus!");
+			return;
+		}
+		if (confirm("Yakin hapus " + idsToDelete.length + " data ini?")) {
+			let successCount = 0,
+				failCount = 0;
+			idsToDelete.forEach((id, idx) => {
+				$.ajax({
+					url: base_url + "index.php/api/products_delete/" + id, // API endpoint to delete product
+					type: "DELETE",
+					dataType: "json",
+					success: (response) => {
+						if (response.success) successCount++;
+						else failCount++;
+						if (idx === idsToDelete.length - 1) {
+							$("#jqxgrid").jqxGrid("updatebounddata");
+							alert(
+								successCount +
+									" data berhasil dihapus, " +
+									failCount +
+									" gagal."
+							);
+						}
+					},
+					error: () => {
+						failCount++;
+						if (idx === idsToDelete.length - 1) {
+							$("#jqxgrid").jqxGrid("updatebounddata");
+							alert(
+								successCount +
+									" data berhasil dihapus, " +
+									failCount +
+									" gagal."
+							);
+						}
+					},
+				});
+			});
+		}
+	}
+
+	// directory map handler by product ID
+	$(document).on("click", ".btn-directory", function (e) {
+		e.preventDefault();
+		e.stopPropagation();
+		const id = $(this).data("id");
+		showDirectoryPopup(id);
+	});
+
+	// Fungsi showDirectoryPopup by product ID
+	window.showDirectoryPopup = function (id) {
+		const dirs = directoryMap[id] || [];
+		if (!dirs.length) {
+			Swal.fire("Tidak ada directory/aksi untuk produk ini.");
+			return;
+		}
+		let html =
+			'<ul style="text-align:center; list-style:none; padding-left:0;">';
+		dirs.forEach((d) => {
+			html += `<li><strong>${d.label}</strong>:<br/><code>${d.url}</code></li>`;
+		});
+		html += "</ul>";
+		Swal.fire({
+			title: "Path Directory",
+			html,
+			width: 600,
+			showConfirmButton: true,
+			confirmButtonText: "Tutup",
+		});
+	};
+
+	$("#jqxgrid").on("pagesizechanged", function (event) {
+		const args = event.args;
+		const newPageSize = args.pagesize;
+		const totalRows = $("#jqxgrid").jqxGrid("getdatainformation").rowscount;
+		if (newPageSize === "All" || newPageSize === 0 || newPageSize === "0") {
+			$("#jqxgrid").jqxGrid({ pagesize: totalRows });
+		}
+	});
+
+	$("#jqxgrid").on("cellvaluechanged", function (event) {
+		const { datafield, rowindex, value } = event.args;
+		const rowdata = $("#jqxgrid").jqxGrid("getrowdata", rowindex);
+
+		if (["totalfat", "protein"].includes(datafield)) {
+			if (value && !value.toString().toLowerCase().endsWith("g")) {
+				$("#jqxgrid").jqxGrid("setcellvalue", rowindex, datafield, value + "g");
+			}
+		} else if (["quantity", "unit_price"].includes(datafield)) {
+			const qty = parseInt(rowdata.quantity) || 0;
+			const unit = parseInt(rowdata.unit_price) || 0;
+			$("#jqxgrid").jqxGrid(
+				"setcellvalue",
+				rowindex,
+				"total_price",
+				qty * unit
+			);
+		}
+	});
+
+	// Logic Add / Edit
+	$("#jqxgrid").on("cellendedit", function (event) {
+		const rowindex = event.args.rowindex;
+		const rowdata = $("#jqxgrid").jqxGrid("getrowdata", rowindex);
+		const kurang = !rowdata["name"];
+
+		if ((!rowdata.id || rowdata.id === "") && kurang) {
+			setTimeout(() => {
+				$("#jqxgrid").jqxGrid("begincelledit", rowindex, "name");
+			}, 10);
+			alert("Field berikut wajib diisi: name");
+			return;
+		}
+
+		if ((!rowdata.id || rowdata.id === "") && !kurang) {
+			rowdata.quantity = !isNaN(rowdata.quantity)
+				? parseInt(rowdata.quantity)
+				: 0;
+			rowdata.unit_price = !isNaN(rowdata.unit_price)
+				? parseInt(rowdata.unit_price)
+				: 0;
+			rowdata.total_price = rowdata.quantity * rowdata.unit_price;
+			$.ajax({
+				url: base_url + "index.php/api/products_add", // API endpoint to add product
+				type: "POST",
+				data: rowdata,
+				dataType: "json",
+				success: function (response) {
+					if (response.success) {
+						alert("Data berhasil ditambah!");
+						$("#jqxgrid").jqxGrid("updatebounddata");
+					} else {
+						alert("Gagal tambah data: " + response.message);
+					}
+				},
+				error: function (xhr, status, error) {
+					alert("Terjadi error: " + error + "\n" + xhr.responseText);
+				},
+			});
+			return;
+		}
+
+		// Jika update
+		if (rowdata.id) {
+			rowdata.quantity = !isNaN(rowdata.quantity)
+				? parseInt(rowdata.quantity)
+				: 0;
+			rowdata.unit_price = !isNaN(rowdata.unit_price)
+				? parseInt(rowdata.unit_price)
+				: 0;
+			rowdata.total_price = rowdata.quantity * rowdata.unit_price;
+			$.ajax({
+				url: base_url + "index.php/api/products_update/" + rowdata.id, // API endpoint to update product
+				type: "PUT",
+				data: JSON.stringify(rowdata),
+				dataType: "json",
+				success: function (response) {
+					if (response.success) {
+						alert("Data berhasil diupdate!");
+					} else {
+						alert("Gagal update data: " + response.message);
+					}
+				},
+				error: function (xhr, status, error) {
+					alert("Terjadi error update: " + error + "\n" + xhr.responseText);
+				},
+			});
+		}
+	});
+});
