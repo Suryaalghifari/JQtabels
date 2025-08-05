@@ -16,28 +16,34 @@ class Api extends CI_Controller
     }
 
     // GET: Ambil semua data
-      public function services_get()
-{
-    $data = $this->Telkom_ref_service_model->get_all();
+   public function services_get()
+    {
+        $data = $this->Telkom_ref_service_model->get_all();
 
-    foreach ($data as &$row) {
-    // Mapping ulang
-    $row['pop_site'] = isset($row['pop']) ? $row['pop'] : "";
-    unset($row['pop']);
-}
-unset($row);
+        foreach ($data as &$row) {
+           // Mapping field pop_site ke pop sebelum update ke database
+            $row['pop_site'] = isset($row['pop']) ? $row['pop'] : null;
+            unset($row['pop']);
+        }
+        unset($row);
 
-    $this->output
-        ->set_content_type('application/json')
-        ->set_output(json_encode($data));
-}
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($data));
+    }
+
 
     // POST: Tambah data baru
-    public function services_add()
+   public function services_add()
     {
         $data = $this->input->post();
 
-        // Kolom yang wajib diisi bisa kamu atur, misal peering harus diisi
+        // Mapping field pop_site ke pop sebelum insert ke database
+        if (isset($data['pop_site'])) {
+            $data['pop'] = $data['pop_site'];
+            unset($data['pop_site']);
+        }
+
         if (empty($data['peering'])) {
             echo json_encode([
                 'success' => false,
@@ -54,6 +60,7 @@ unset($row);
         }
     }
 
+
     // PUT: Update data by ID
     public function services_update($id = null)
     {
@@ -69,6 +76,12 @@ unset($row);
             return;
         }
 
+        // Mapping field pop_site ke pop sebelum update ke database
+        if (isset($data['pop_site'])) {
+            $data['pop'] = $data['pop_site'];
+            unset($data['pop_site']);
+        }
+
         $updated = $this->Telkom_ref_service_model->update($id, $data);
         if ($updated) {
             echo json_encode(['success' => true]);
@@ -76,6 +89,7 @@ unset($row);
             echo json_encode(['success' => false, 'message' => 'Gagal update data']);
         }
     }
+
     
     // DELETE: Hapus data by ID
     public function services_delete($id = null)

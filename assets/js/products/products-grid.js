@@ -22,6 +22,7 @@ $(function () {
 	$("#jqxgrid").jqxGrid({
 		width: "100%",
 		height: 600,
+		theme: "ui-redmond",
 		source: dataAdapter,
 		pageable: true,
 		pagesizeoptions: ["5", "10", "20", "50", "100", "99999"],
@@ -72,42 +73,42 @@ $(function () {
 			{
 				text: "Interface",
 				datafield: "interface",
-				width: 100,
+				width: 800,
 				align: "center",
 				cellsalign: "center",
 			},
 			{
-				text: "POP", // dari pop
+				text: "POP",
 				datafield: "pop_site", // pengganti "pop"
-				width: 80,
+				width: 150,
 				align: "center",
 				cellsalign: "center",
 			},
 			{
 				text: "RRD Path",
 				datafield: "rrd_path",
-				width: 80,
+				width: 400,
 				align: "center",
 				cellsalign: "center",
 			},
 			{
 				text: "RRD Alias",
 				datafield: "rrd_alias",
-				width: 80,
+				width: 350,
 				align: "center",
 				cellsalign: "center",
 			},
 			{
 				text: "RRD Status",
 				datafield: "rrd_status",
-				width: 80,
+				width: 125,
 				align: "center",
 				cellsalign: "center",
 			},
 			{
 				text: "Capacity",
 				datafield: "Capacity",
-				width: 80,
+				width: 150,
 				align: "center",
 				cellsalign: "center",
 			},
@@ -133,19 +134,20 @@ $(function () {
 	// Handler Tambah Row
 	function handleAddRow() {
 		const newrow = {
-			name: "",
-			type: "",
-			calories: "",
-			totalfat: "",
-			protein: "",
-			quantity: "",
-			unit_price: "",
-			total_price: "",
+			peering: "",
+			location: "",
+			interface: "",
+			pop_site: "",
+			rrd_path: "",
+			rrd_alias: "",
+			rrd_status: "",
+			Capacity: "",
+			service: "",
 		};
 		$("#jqxgrid").jqxGrid("addrow", null, newrow);
 		const datainfo = $("#jqxgrid").jqxGrid("getdatainformation");
 		const lastrow = datainfo.rowscount - 1;
-		$("#jqxgrid").jqxGrid("begincelledit", lastrow, "name");
+		$("#jqxgrid").jqxGrid("begincelledit", lastrow, "peering");
 	}
 
 	function handleDeleteRows() {
@@ -167,7 +169,7 @@ $(function () {
 				failCount = 0;
 			idsToDelete.forEach((id, idx) => {
 				$.ajax({
-					url: base_url + "index.php/api/products_delete/" + id, // API endpoint to delete product
+					url: base_url + "index.php/api/services_delete/" + id, // API endpoint to delete product
 					type: "DELETE",
 					dataType: "json",
 					success: (response) => {
@@ -239,37 +241,17 @@ $(function () {
 		}
 	});
 
-	$("#jqxgrid").on("cellvaluechanged", function (event) {
-		const { datafield, rowindex, value } = event.args;
-		const rowdata = $("#jqxgrid").jqxGrid("getrowdata", rowindex);
-
-		if (["totalfat", "protein"].includes(datafield)) {
-			if (value && !value.toString().toLowerCase().endsWith("g")) {
-				$("#jqxgrid").jqxGrid("setcellvalue", rowindex, datafield, value + "g");
-			}
-		} else if (["quantity", "unit_price"].includes(datafield)) {
-			const qty = parseInt(rowdata.quantity) || 0;
-			const unit = parseInt(rowdata.unit_price) || 0;
-			$("#jqxgrid").jqxGrid(
-				"setcellvalue",
-				rowindex,
-				"total_price",
-				qty * unit
-			);
-		}
-	});
-
-	// Logic Add / Edit
+	// Logic Add
 	$("#jqxgrid").on("cellendedit", function (event) {
 		const rowindex = event.args.rowindex;
 		const rowdata = $("#jqxgrid").jqxGrid("getrowdata", rowindex);
-		const kurang = !rowdata["name"];
+		const kurang = !rowdata["peering"];
 
 		if ((!rowdata.id || rowdata.id === "") && kurang) {
 			setTimeout(() => {
-				$("#jqxgrid").jqxGrid("begincelledit", rowindex, "name");
+				$("#jqxgrid").jqxGrid("begincelledit", rowindex, "peering");
 			}, 10);
-			alert("Field berikut wajib diisi: name");
+			alert("Field berikut wajib diisi: peering");
 			return;
 		}
 
@@ -282,7 +264,7 @@ $(function () {
 				: 0;
 			rowdata.total_price = rowdata.quantity * rowdata.unit_price;
 			$.ajax({
-				url: base_url + "index.php/api/products_add", // API endpoint to add product
+				url: base_url + "index.php/api/services_add", // API endpoint to add product
 				type: "POST",
 				data: rowdata,
 				dataType: "json",
@@ -311,7 +293,7 @@ $(function () {
 				: 0;
 			rowdata.total_price = rowdata.quantity * rowdata.unit_price;
 			$.ajax({
-				url: base_url + "index.php/api/products_update/" + rowdata.id, // API endpoint to update product
+				url: base_url + "index.php/api/services_update/" + rowdata.id, // API endpoint to update product
 				type: "PUT",
 				data: JSON.stringify(rowdata),
 				dataType: "json",
