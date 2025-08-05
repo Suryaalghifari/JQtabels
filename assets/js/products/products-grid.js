@@ -59,6 +59,7 @@ $(function () {
 			{
 				text: "ID",
 				datafield: "id",
+				//hidden: true,
 				editable: false,
 				width: 200,
 				align: "center",
@@ -173,7 +174,14 @@ $(function () {
 	function handleDeleteRows() {
 		const selectedIndexes = $("#jqxgrid").jqxGrid("getselectedrowindexes");
 		if (!selectedIndexes.length) {
-			alert("Pilih data yang mau dihapus (centang di kiri)!");
+			showNotif({
+				icon: "warning",
+				title: "Pilih data yang mau dihapus (centang di kiri)!",
+				position: "center",
+				showConfirmButton: true,
+				confirmButtonText: "Tutup",
+				timer: null,
+			});
 			return;
 		}
 		const idsToDelete = selectedIndexes
@@ -181,45 +189,67 @@ $(function () {
 			.filter((id) => !!id);
 
 		if (!idsToDelete.length) {
-			alert("Tidak ada data valid untuk dihapus!");
+			showNotif({
+				icon: "warning",
+				title: "Tidak ada data valid untuk dihapus!",
+				position: "center",
+				showConfirmButton: true,
+				confirmButtonText: "Tutup",
+				timer: null,
+			});
 			return;
 		}
-		if (confirm("Yakin hapus " + idsToDelete.length + " data ini?")) {
-			let successCount = 0,
-				failCount = 0;
-			idsToDelete.forEach((id, idx) => {
-				$.ajax({
-					url: base_url + "index.php/api/services_delete/" + id, // API endpoint to delete product
-					type: "DELETE",
-					dataType: "json",
-					success: (response) => {
-						if (response.success) successCount++;
-						else failCount++;
-						if (idx === idsToDelete.length - 1) {
-							$("#jqxgrid").jqxGrid("updatebounddata");
-							alert(
-								successCount +
-									" data berhasil dihapus, " +
-									failCount +
-									" gagal."
-							);
-						}
-					},
-					error: () => {
-						failCount++;
-						if (idx === idsToDelete.length - 1) {
-							$("#jqxgrid").jqxGrid("updatebounddata");
-							alert(
-								successCount +
-									" data berhasil dihapus, " +
-									failCount +
-									" gagal."
-							);
-						}
-					},
+
+		Swal.fire({
+			title: "Yakin hapus?",
+			text: `Yakin hapus ${idsToDelete.length} data ini?`,
+			icon: "question",
+			showCancelButton: true,
+			confirmButtonText: "Ya, hapus!",
+			cancelButtonText: "Batal",
+			position: "center",
+		}).then((result) => {
+			if (result.isConfirmed) {
+				let successCount = 0,
+					failCount = 0;
+				idsToDelete.forEach((id, idx) => {
+					$.ajax({
+						url: base_url + "index.php/api/services_delete/" + id,
+						type: "DELETE",
+						dataType: "json",
+						success: (response) => {
+							if (response.success) successCount++;
+							else failCount++;
+							if (idx === idsToDelete.length - 1) {
+								$("#jqxgrid").jqxGrid("updatebounddata");
+								showNotif({
+									icon: "success",
+									title: "Hapus Data",
+									text: `${successCount} data berhasil dihapus, ${failCount} gagal.`,
+									position: "center",
+									toast: true,
+									timer: 2200,
+								});
+							}
+						},
+						error: () => {
+							failCount++;
+							if (idx === idsToDelete.length - 1) {
+								$("#jqxgrid").jqxGrid("updatebounddata");
+								showNotif({
+									icon: "error",
+									title: "Error",
+									text: `${successCount} data berhasil dihapus, ${failCount} gagal.`,
+									position: "top-end",
+									toast: true,
+									timer: 2200,
+								});
+							}
+						},
+					});
 				});
-			});
-		}
+			}
+		});
 	}
 
 	// directory map handler by product ID
@@ -265,16 +295,37 @@ $(function () {
 				dataType: "json",
 				success: function (response) {
 					if (response.success) {
-						alert(
-							"Data berhasil ditambah! Data baru dapat dilihat di bagian bawah tabel."
-						);
+						showNotif({
+							icon: "success",
+							title: "Data berhasil ditambah!",
+							text: "Data baru dapat dilihat di bagian bawah tabel.",
+							position: "center",
+							toast: true,
+							timer: 2000,
+						});
 						$("#jqxgrid").jqxGrid("updatebounddata");
 					} else {
-						alert("Gagal tambah data: " + response.message);
+						showNotif({
+							icon: "error",
+							title: "Gagal tambah data",
+							text: response.message || "Unknown error",
+							position: "center",
+							showConfirmButton: true,
+							confirmButtonText: "Tutup",
+							timer: null,
+						});
 					}
 				},
 				error: function (xhr, status, error) {
-					alert("Terjadi error: " + error + "\n" + xhr.responseText);
+					showNotif({
+						icon: "error",
+						title: "Terjadi error!",
+						html: `<div style="text-align:left"><b>${error}</b><hr><pre style="max-width:300px;white-space:pre-wrap;">${xhr.responseText}</pre></div>`,
+						position: "center",
+						showConfirmButton: true,
+						confirmButtonText: "Tutup",
+						timer: null,
+					});
 				},
 			});
 			return;
@@ -283,46 +334,86 @@ $(function () {
 		//  update data
 		if (rowdata.id) {
 			$.ajax({
-				url: base_url + "index.php/api/services_update/" + rowdata.id, // API endpoint to update product
+				url: base_url + "index.php/api/services_update/" + rowdata.id,
 				type: "PUT",
 				data: JSON.stringify(rowdata),
 				dataType: "json",
 				success: function (response) {
 					if (response.success) {
-						alert("Data berhasil diupdate!");
+						showNotif({
+							icon: "success",
+							title: "Berhasil!",
+							text: "Data berhasil diupdate!",
+							toast: true,
+							timer: 3000,
+							position: "center",
+						});
 					} else {
-						alert("Gagal update data: " + response.message);
+						showNotif({
+							icon: "error",
+							title: "Gagal update data!",
+							text: response.message || "Unknown error",
+						});
 					}
 				},
 				error: function (xhr, status, error) {
-					alert("Terjadi error update: " + error + "\n" + xhr.responseText);
+					showNotif({
+						icon: "error",
+						title: "Terjadi error update!",
+						html: `<div style="text-align:left">
+                        <b>${error}</b>
+                        <hr>
+                        <pre style="max-width:300px;white-space:pre-wrap;">${xhr.responseText}</pre>
+                       </div>`,
+					});
 				},
 			});
 		}
 	});
 	window.showDirectoryPopup = function (id) {
 		$.ajax({
-			url: base_url + "index.php/api/services_directory/" + id, // API endpoint to get directory by product ID
+			url: base_url + "index.php/api/services_directory/" + id,
 			type: "GET",
 			dataType: "json",
 			success: function (response) {
 				if (response.success && response.rrd_path) {
-					Swal.fire({
+					showNotif({
+						icon: "info",
 						title: "Path Directory",
-						html: `<ul style="text-align:center; list-style:none; padding-left:0;">
-                               <li><strong>RRD Path:</strong><br/><code>${response.rrd_path}</code></li>
-                               <li><strong>RRD Alias:</strong><br/><code>${response.rrd_alias}</code></li>
-                           </ul>`,
-						width: 600,
+						html: `
+                        <ul style="text-align:center; list-style:none; padding-left:0;">
+                            <li><strong>RRD Path:</strong><br/><code>${response.rrd_path}</code></li>
+                            <li><strong>RRD Alias:</strong><br/><code>${response.rrd_alias}</code></li>
+                        </ul>
+                    `,
+						width: 400,
+						position: "center",
 						showConfirmButton: true,
 						confirmButtonText: "Tutup",
+						timer: null,
 					});
 				} else {
-					Swal.fire("Tidak ada directory/aksi untuk produk ini.");
+					showNotif({
+						icon: "warning",
+						title: "Tidak ada directory/aksi untuk produk ini.",
+						position: "center",
+						width: 350,
+						showConfirmButton: true,
+						confirmButtonText: "Tutup",
+						timer: null,
+					});
 				}
 			},
 			error: function () {
-				Swal.fire("Gagal ambil directory dari server.");
+				showNotif({
+					icon: "error",
+					title: "Gagal ambil directory dari server.",
+					position: "center",
+					width: 350,
+					showConfirmButton: true,
+					confirmButtonText: "Tutup",
+					timer: null,
+				});
 			},
 		});
 	};

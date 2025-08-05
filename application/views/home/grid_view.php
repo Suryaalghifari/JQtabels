@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="<?= base_url('assets/css/styles/jqx.light.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/styles/jqx.material.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/styles/jqx.ui-sunny.css') ?>">
-        <link rel="stylesheet" href="<?= base_url('assets/css/styles/jqx.ui-redmond.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/styles/jqx.ui-redmond.css') ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -31,6 +31,7 @@
     
     <script src='<?= base_url('assets/js/products/products-directory-map.js') ?>'></script> 
     <script src="<?= base_url('assets/js/products/products-grid.js') ?>"></script>
+    <script src="<?= base_url('assets/js/notif/swalNotif.js') ?>"></script>
     
 </head>
 <body>
