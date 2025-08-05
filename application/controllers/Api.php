@@ -105,4 +105,24 @@ class Api extends CI_Controller
             echo json_encode(['success' => false, 'message' => 'Gagal hapus data']);
         }
     }
+
+    // Controller: Api.php
+    public function services_directory($id = null)
+    {
+        if (!$id) {
+            echo json_encode(['success' => false, 'message' => 'ID wajib ada']);
+            return;
+        }
+        $data = $this->Telkom_ref_service_model->get_by_id($id);
+        if ($data && !empty($data['rrd_path'])) {
+            echo json_encode([
+                'success' => true,
+                'rrd_path' => $data['rrd_path'],
+                'rrd_alias' => $data['rrd_alias'], // misal mau sekalian alias juga
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Directory tidak ditemukan']);
+        }
+    }
+
 }

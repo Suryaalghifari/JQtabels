@@ -133,7 +133,18 @@ $(function () {
 
 	// Handler Tambah Row
 	function handleAddRow() {
+		// Cek apakah sudah ada row kosong yang belum disave
+		const rows = $("#jqxgrid").jqxGrid("getrows");
+		const hasEmpty = rows.some(
+			(r) => !r.peering && !r.location && !r.interface && !r.pop_site
+		);
+		if (hasEmpty) {
+			// Sudah ada baris kosong, jangan tambah lagi
+			return;
+		}
+		// Tambah row kosong lokal
 		const newrow = {
+			id: "",
 			peering: "",
 			location: "",
 			interface: "",
@@ -144,10 +155,10 @@ $(function () {
 			Capacity: "",
 			service: "",
 		};
-		$("#jqxgrid").jqxGrid("addrow", null, newrow);
-		const datainfo = $("#jqxgrid").jqxGrid("getdatainformation");
-		const lastrow = datainfo.rowscount - 1;
-		$("#jqxgrid").jqxGrid("begincelledit", lastrow, "peering");
+		// Gunakan addrow dengan mode 'first' agar muncul di atas page aktif
+		$("#jqxgrid").jqxGrid("addrow", null, newrow, "first");
+		// Mulai edit di cell pertama
+		$("#jqxgrid").jqxGrid("begincelledit", 0, "peering");
 	}
 
 	function handleDeleteRows() {
@@ -210,28 +221,6 @@ $(function () {
 		showDirectoryPopup(id);
 	});
 
-	// Fungsi showDirectoryPopup by product ID
-	window.showDirectoryPopup = function (id) {
-		const dirs = directoryMap[id] || [];
-		if (!dirs.length) {
-			Swal.fire("Tidak ada directory/aksi untuk produk ini.");
-			return;
-		}
-		let html =
-			'<ul style="text-align:center; list-style:none; padding-left:0;">';
-		dirs.forEach((d) => {
-			html += `<li><strong>${d.label}</strong>:<br/><code>${d.url}</code></li>`;
-		});
-		html += "</ul>";
-		Swal.fire({
-			title: "Path Directory",
-			html,
-			width: 600,
-			showConfirmButton: true,
-			confirmButtonText: "Tutup",
-		});
-	};
-
 	$("#jqxgrid").on("pagesizechanged", function (event) {
 		const args = event.args;
 		const newPageSize = args.pagesize;
@@ -241,13 +230,16 @@ $(function () {
 		}
 	});
 
-	// Logic Add
 	$("#jqxgrid").on("cellendedit", function (event) {
-		const rowindex = event.args.rowindex;
+		const { datafield, rowindex, value, oldvalue } = event.args;
 		const rowdata = $("#jqxgrid").jqxGrid("getrowdata", rowindex);
-		const kurang = !rowdata["peering"];
 
-		if ((!rowdata.id || rowdata.id === "") && kurang) {
+		rowdata[datafield] = value;
+		if (value === oldvalue) {
+			return;
+		}
+
+		if ((!rowdata.id || rowdata.id === "") && !rowdata.peering) {
 			setTimeout(() => {
 				$("#jqxgrid").jqxGrid("begincelledit", rowindex, "peering");
 			}, 10);
@@ -255,22 +247,18 @@ $(function () {
 			return;
 		}
 
-		if ((!rowdata.id || rowdata.id === "") && !kurang) {
-			rowdata.quantity = !isNaN(rowdata.quantity)
-				? parseInt(rowdata.quantity)
-				: 0;
-			rowdata.unit_price = !isNaN(rowdata.unit_price)
-				? parseInt(rowdata.unit_price)
-				: 0;
-			rowdata.total_price = rowdata.quantity * rowdata.unit_price;
+		// add data baru
+		if ((!rowdata.id || rowdata.id === "") && rowdata.peering) {
 			$.ajax({
-				url: base_url + "index.php/api/services_add", // API endpoint to add product
+				url: base_url + "index.php/api/services_add", // API endpoint to add new product
 				type: "POST",
 				data: rowdata,
 				dataType: "json",
 				success: function (response) {
 					if (response.success) {
-						alert("Data berhasil ditambah!");
+						alert(
+							"Data berhasil ditambah! Data baru dapat dilihat di bagian bawah tabel."
+						);
 						$("#jqxgrid").jqxGrid("updatebounddata");
 					} else {
 						alert("Gagal tambah data: " + response.message);
@@ -283,15 +271,8 @@ $(function () {
 			return;
 		}
 
-		// Jika update
+		//  update data
 		if (rowdata.id) {
-			rowdata.quantity = !isNaN(rowdata.quantity)
-				? parseInt(rowdata.quantity)
-				: 0;
-			rowdata.unit_price = !isNaN(rowdata.unit_price)
-				? parseInt(rowdata.unit_price)
-				: 0;
-			rowdata.total_price = rowdata.quantity * rowdata.unit_price;
 			$.ajax({
 				url: base_url + "index.php/api/services_update/" + rowdata.id, // API endpoint to update product
 				type: "PUT",
@@ -310,4 +291,30 @@ $(function () {
 			});
 		}
 	});
+	window.showDirectoryPopup = function (id) {
+		$.ajax({
+			url: base_url + "index.php/api/services_directory/" + id, // API endpoint to get directory by product ID
+			type: "GET",
+			dataType: "json",
+			success: function (response) {
+				if (response.success && response.rrd_path) {
+					Swal.fire({
+						title: "Path Directory",
+						html: `<ul style="text-align:center; list-style:none; padding-left:0;">
+                               <li><strong>RRD Path:</strong><br/><code>${response.rrd_path}</code></li>
+                               <li><strong>RRD Alias:</strong><br/><code>${response.rrd_alias}</code></li>
+                           </ul>`,
+						width: 600,
+						showConfirmButton: true,
+						confirmButtonText: "Tutup",
+					});
+				} else {
+					Swal.fire("Tidak ada directory/aksi untuk produk ini.");
+				}
+			},
+			error: function () {
+				Swal.fire("Gagal ambil directory dari server.");
+			},
+		});
+	};
 });

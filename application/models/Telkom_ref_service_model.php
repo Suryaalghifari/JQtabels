@@ -64,4 +64,10 @@ class Telkom_ref_service_model extends CI_Model
         $this->db->where('id', $id);
         return $this->db->delete('telkom_ref_service');
     }
+
+    public function get_by_id($id) // get data directory by id
+    {
+        return $this->db->get_where('telkom_ref_service', ['id' => $id])->row_array();
+    }
+
 }
