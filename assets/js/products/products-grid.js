@@ -3,7 +3,7 @@ $(function () {
 	const source = {
 		datatype: "json",
 		datafields: [
-			{ name: "id", type: "number" },
+			{ name: "id", type: "string" },
 			{ name: "peering", type: "string" },
 			{ name: "location", type: "string" },
 			{ name: "interface", type: "string" },
@@ -11,9 +11,10 @@ $(function () {
 			{ name: "rrd_path", type: "string" },
 			{ name: "rrd_alias", type: "string" },
 			{ name: "rrd_status", type: "string" },
-			{ name: "Capacity", type: "number" },
+			{ name: "Capacity", type: "string" }, // <--- FIX INI!
 			{ name: "service", type: "string" },
 		],
+
 		url: base_url + "index.php/api/services_get", // API endpoint ambil data services
 	};
 	const dataAdapter = new $.jqx.dataAdapter(source);
@@ -46,7 +47,6 @@ $(function () {
 		columns: [
 			{
 				text: "No",
-				datafield: "no",
 				width: 50,
 				editable: false,
 				align: "center",
@@ -56,6 +56,14 @@ $(function () {
 				},
 			},
 
+			{
+				text: "ID",
+				datafield: "id",
+				editable: false,
+				width: 200,
+				align: "center",
+				cellsalign: "center",
+			},
 			{
 				text: "Peering",
 				datafield: "peering",
@@ -121,12 +129,13 @@ $(function () {
 			},
 			{
 				text: "Directory",
-				datafield: "id",
 				editable: false,
 				width: 100,
 				align: "center",
-				cellsrenderer: (row, column, value) =>
-					`<button class="btn-directory" data-id="${value}" style="display:block; margin:0 auto;">📂</button>`,
+				cellsrenderer: function (row, column, value) {
+					const rowData = $("#jqxgrid").jqxGrid("getrowdata", row);
+					return `<button class="btn-directory" data-id="${rowData.id}" style="display:block; margin:0 auto;">📂</button>`;
+				},
 			},
 		],
 	});

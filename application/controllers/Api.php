@@ -11,6 +11,7 @@ class Api extends CI_Controller
 {
     public function __construct()
     {
+        
         parent::__construct();
         $this->load->model('Telkom_ref_service_model'); 
     }
@@ -21,6 +22,7 @@ class Api extends CI_Controller
         $data = $this->Telkom_ref_service_model->get_all();
 
         foreach ($data as &$row) {
+            
            // Mapping field pop_site ke pop sebelum update ke database
             $row['pop_site'] = isset($row['pop']) ? $row['pop'] : null;
             unset($row['pop']);

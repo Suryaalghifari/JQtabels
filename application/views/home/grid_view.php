@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Grid jqxGrid</title>
+    <title>JQtabels - CRUD</title>
     <link rel="stylesheet" href="<?= base_url('assets/css/styles/jqx.base.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/styles/jqx.light.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/styles/jqx.material.css') ?>">
