@@ -7,7 +7,7 @@ $(function () {
 			{ name: "peering", type: "string" },
 			{ name: "location", type: "string" },
 			{ name: "interface", type: "string" },
-			{ name: "pop", type: "string" },
+			{ name: "pop_site", type: "string" },
 			{ name: "rrd_path", type: "string" },
 			{ name: "rrd_alias", type: "string" },
 			{ name: "rrd_status", type: "string" },
@@ -63,63 +63,60 @@ $(function () {
 				cellsalign: "center",
 			},
 			{
-				text: "Type",
-				datafield: "type",
+				text: "Location",
+				datafield: "location",
 				width: 180,
 				align: "center",
 				cellsalign: "center",
 			},
 			{
-				text: "Calories",
-				datafield: "calories",
-				width: 80,
-				align: "center",
-				cellsalign: "center",
-			},
-			{
-				text: "Total Fat",
-				datafield: "totalfat",
-				width: 80,
-				align: "center",
-				cellsalign: "center",
-			},
-			{
-				text: "Protein",
-				datafield: "protein",
-				width: 80,
-				align: "center",
-				cellsalign: "center",
-			},
-			{
-				text: "Qty",
-				datafield: "quantity",
-				width: 80,
-				align: "center",
-				cellsalign: "center",
-			},
-			{
-				text: "Unit Price",
-				datafield: "unit_price",
+				text: "Interface",
+				datafield: "interface",
 				width: 100,
 				align: "center",
-				cellsrenderer: (row, column, value) =>
-					value
-						? `<span style="display:block; text-align:center; width:100%;">Rp ${parseInt(
-								value
-						  ).toLocaleString("id-ID")}</span>`
-						: "",
+				cellsalign: "center",
 			},
 			{
-				text: "Total Price",
-				datafield: "total_price",
-				width: 120,
+				text: "POP", // dari pop
+				datafield: "pop_site", // pengganti "pop"
+				width: 80,
 				align: "center",
-				cellsrenderer: (row, column, value) =>
-					value
-						? `<span style="display:block; text-align:center; width:100%;">Rp ${parseInt(
-								value
-						  ).toLocaleString("id-ID")}</span>`
-						: "",
+				cellsalign: "center",
+			},
+			{
+				text: "RRD Path",
+				datafield: "rrd_path",
+				width: 80,
+				align: "center",
+				cellsalign: "center",
+			},
+			{
+				text: "RRD Alias",
+				datafield: "rrd_alias",
+				width: 80,
+				align: "center",
+				cellsalign: "center",
+			},
+			{
+				text: "RRD Status",
+				datafield: "rrd_status",
+				width: 80,
+				align: "center",
+				cellsalign: "center",
+			},
+			{
+				text: "Capacity",
+				datafield: "Capacity",
+				width: 80,
+				align: "center",
+				cellsalign: "center",
+			},
+			{
+				text: "Service",
+				datafield: "service",
+				width: 80,
+				align: "center",
+				cellsalign: "center",
 			},
 			{
 				text: "Directory",

@@ -2,6 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
+ * @property Output $output
  * @property CI_Input $input
  * @property Telkom_ref_service_model $Telkom_ref_service_model
  */
@@ -15,12 +16,21 @@ class Api extends CI_Controller
     }
 
     // GET: Ambil semua data
-    public function services_get()
-    {
-        $services = $this->Telkom_ref_service_model->get_all(); 
-        header('Content-Type: application/json');
-        echo json_encode($services);
-    }
+      public function services_get()
+{
+    $data = $this->Telkom_ref_service_model->get_all();
+
+    foreach ($data as &$row) {
+    // Mapping ulang
+    $row['pop_site'] = isset($row['pop']) ? $row['pop'] : "";
+    unset($row['pop']);
+}
+unset($row);
+
+    $this->output
+        ->set_content_type('application/json')
+        ->set_output(json_encode($data));
+}
 
     // POST: Tambah data baru
     public function services_add()
