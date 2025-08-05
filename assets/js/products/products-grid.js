@@ -1,19 +1,20 @@
 $(function () {
-	// --- Source & Data Adapter ---
+	// data
 	const source = {
 		datatype: "json",
 		datafields: [
-			{ name: "id", type: "string" },
-			{ name: "name", type: "string" },
-			{ name: "type", type: "string" },
-			{ name: "calories", type: "string" },
-			{ name: "totalfat", type: "string" },
-			{ name: "protein", type: "string" },
-			{ name: "quantity", type: "string" },
-			{ name: "unit_price", type: "string" },
-			{ name: "total_price", type: "string" },
+			{ name: "id", type: "number" },
+			{ name: "peering", type: "string" },
+			{ name: "location", type: "string" },
+			{ name: "interface", type: "string" },
+			{ name: "pop", type: "string" },
+			{ name: "rrd_path", type: "string" },
+			{ name: "rrd_alias", type: "string" },
+			{ name: "rrd_status", type: "string" },
+			{ name: "Capacity", type: "number" },
+			{ name: "service", type: "string" },
 		],
-		url: base_url + "index.php/api/products_get", // API endpoint to fetch product
+		url: base_url + "index.php/api/services_get", // API endpoint ambil data services
 	};
 	const dataAdapter = new $.jqx.dataAdapter(source);
 
@@ -23,7 +24,7 @@ $(function () {
 		height: 600,
 		source: dataAdapter,
 		pageable: true,
-		pagesizeoptions: ["5", "10", "20", "50", "100"],
+		pagesizeoptions: ["5", "10", "20", "50", "100", "99999"],
 		pagesize: 20,
 		sortable: true,
 		filterable: true,
@@ -55,8 +56,8 @@ $(function () {
 			},
 
 			{
-				text: "Name",
-				datafield: "name",
+				text: "Peering",
+				datafield: "peering",
 				width: 200,
 				align: "center",
 				cellsalign: "center",

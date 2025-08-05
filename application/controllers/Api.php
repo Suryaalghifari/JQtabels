@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * @property CI_Input $input
- * @property Product_model $Product_model
+ * @property Telkom_ref_service_model $Telkom_ref_service_model
  */
 
 class Api extends CI_Controller
@@ -11,30 +11,32 @@ class Api extends CI_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('Product_model'); 
+        $this->load->model('Telkom_ref_service_model'); 
     }
 
-    public function products_get() // api untuk ambil semua data produk
+    // GET: Ambil semua data
+    public function services_get()
     {
-        $products = $this->Product_model->get_all(); 
+        $services = $this->Telkom_ref_service_model->get_all(); 
         header('Content-Type: application/json');
-        echo json_encode($products);
+        echo json_encode($services);
     }
 
-    public function products_add() // api untuk tambah produk baru
+    // POST: Tambah data baru
+    public function services_add()
     {
         $data = $this->input->post();
 
-        
-        if (empty($data['name'])) {
+        // Kolom yang wajib diisi bisa kamu atur, misal peering harus diisi
+        if (empty($data['peering'])) {
             echo json_encode([
                 'success' => false,
-                'message' => 'Name wajib diisi'
+                'message' => 'Peering wajib diisi'
             ]);
             return;
         }
 
-        $id = $this->Product_model->insert($data);
+        $id = $this->Telkom_ref_service_model->insert($data);
         if ($id) {
             echo json_encode(['success' => true, 'id' => $id]);
         } else {
@@ -42,8 +44,8 @@ class Api extends CI_Controller
         }
     }
 
-
-    public function products_update($id = null) // api untuk update produk berdasarkan ID
+    // PUT: Update data by ID
+    public function services_update($id = null)
     {
         $data = json_decode(file_get_contents('php://input'), true); 
 
@@ -57,7 +59,7 @@ class Api extends CI_Controller
             return;
         }
 
-        $updated = $this->Product_model->update($id, $data);
+        $updated = $this->Telkom_ref_service_model->update($id, $data);
         if ($updated) {
             echo json_encode(['success' => true]);
         } else {
@@ -65,18 +67,18 @@ class Api extends CI_Controller
         }
     }
     
-    public function products_delete($id = null)// api untuk hapus produk berdasarkan ID
+    // DELETE: Hapus data by ID
+    public function services_delete($id = null)
     {
         if (!$id) {
             echo json_encode(['success' => false, 'message' => 'ID wajib ada']);
             return;
         }
-        $deleted = $this->Product_model->delete($id);
+        $deleted = $this->Telkom_ref_service_model->delete($id);
         if ($deleted) {
             echo json_encode(['success' => true]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Gagal hapus data']);
         }
     }
-
 }
