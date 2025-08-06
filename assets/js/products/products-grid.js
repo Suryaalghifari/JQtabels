@@ -21,7 +21,7 @@ $(function () {
 
 	$("#jqxgrid").jqxGrid({
 		width: "100%",
-		height: 600,
+		height: "100%",
 		theme: "ui-redmond",
 		source: dataAdapter,
 		pageable: true,

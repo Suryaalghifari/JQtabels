@@ -37,6 +37,6 @@
     
 </head>
 <body>
-    <div id="jqxgrid"></div>
+    <div id="jqxgrid" class="jqxgrid-fullscreen"></div>
 </body>
 </html>
