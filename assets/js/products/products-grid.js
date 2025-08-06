@@ -11,7 +11,7 @@ $(function () {
 			{ name: "rrd_path", type: "string" },
 			{ name: "rrd_alias", type: "string" },
 			{ name: "rrd_status", type: "string" },
-			{ name: "Capacity", type: "string" }, // <--- FIX INI!
+			{ name: "Capacity", type: "string" },
 			{ name: "service", type: "string" },
 		],
 
@@ -19,7 +19,6 @@ $(function () {
 	};
 	const dataAdapter = new $.jqx.dataAdapter(source);
 
-	// --- Init Grid ---
 	$("#jqxgrid").jqxGrid({
 		width: "100%",
 		height: 600,
@@ -36,8 +35,12 @@ $(function () {
 		showtoolbar: true,
 		rendertoolbar: function (toolbar) {
 			const container = $("<div style='margin: 5px;'></div>");
-			const addButton = $("<button>Tambah Data</button>");
-			const deleteButton = $("<button>Hapus Data</button>");
+			const addButton = $(
+				"<button class='btn-action'><i class='bi bi-plus-circle'></i> Tambah Data</button>"
+			);
+			const deleteButton = $(
+				"<button class='btn-action'><i class='bi bi-trash'></i> Hapus Data</button>"
+			);
 			container.append(addButton, deleteButton);
 			toolbar.append(container);
 
@@ -143,16 +146,14 @@ $(function () {
 
 	// Handler Tambah Row
 	function handleAddRow() {
-		// Cek apakah sudah ada row kosong yang belum disave
 		const rows = $("#jqxgrid").jqxGrid("getrows");
 		const hasEmpty = rows.some(
 			(r) => !r.peering && !r.location && !r.interface && !r.pop_site
 		);
 		if (hasEmpty) {
-			// Sudah ada baris kosong, jangan tambah lagi
 			return;
 		}
-		// Tambah row kosong lokal
+
 		const newrow = {
 			id: "",
 			peering: "",
@@ -165,9 +166,8 @@ $(function () {
 			Capacity: "",
 			service: "",
 		};
-		// Gunakan addrow dengan mode 'first' agar muncul di atas page aktif
+
 		$("#jqxgrid").jqxGrid("addrow", null, newrow, "first");
-		// Mulai edit di cell pertama
 		$("#jqxgrid").jqxGrid("begincelledit", 0, "peering");
 	}
 
@@ -383,7 +383,6 @@ $(function () {
 						html: `
                         <ul style="text-align:center; list-style:none; padding-left:0;">
                             <li><strong>RRD Path:</strong><br/><code>${response.rrd_path}</code></li>
-                            <li><strong>RRD Alias:</strong><br/><code>${response.rrd_alias}</code></li>
                         </ul>
                     `,
 						width: 400,

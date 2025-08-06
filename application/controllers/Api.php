@@ -120,7 +120,7 @@ class Api extends CI_Controller
             echo json_encode([
                 'success' => true,
                 'rrd_path' => $data['rrd_path'],
-                'rrd_alias' => $data['rrd_alias'], // misal mau sekalian alias juga
+                'rrd_alias' => $data['rrd_alias'],
             ]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Directory tidak ditemukan']);

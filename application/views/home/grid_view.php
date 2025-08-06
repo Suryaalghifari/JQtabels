@@ -2,12 +2,14 @@
 <html>
 <head>
     <title>JQtabels - CRUD</title>
+    <link rel="icon" type="image/png" href="<?= base_url('assets/images/logo.png') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/styles/jqx.base.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/styles/jqx.light.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/styles/jqx.material.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/styles/jqx.ui-sunny.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/styles/jqx.ui-redmond.css') ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="<?= base_url('assets/js/jqwidgets/jqxcore.js') ?>"></script>
